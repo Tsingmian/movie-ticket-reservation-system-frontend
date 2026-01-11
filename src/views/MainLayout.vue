@@ -16,13 +16,7 @@
           <!-- <el-menu-item index="/select">场次座位选择</el-menu-item> -->
           <el-menu-item index="/orders">个人订单</el-menu-item>
           <el-menu-item index="/reviews">观影评价</el-menu-item>
-
-          <el-menu-item
-            v-if="user.role === 'admin'"
-            index="/admin"
-          >
-            管理系统
-          </el-menu-item>
+          <el-menu-item v-if="user.role === 'admin' "index="/admin">管理系统</el-menu-item>
         </el-menu>
       </aside>
 
@@ -35,18 +29,40 @@
 </template>
 
 <script setup>
+import { ref, computed } from "vue";
+
 import { useRouter } from "vue-router";
 
+import { getUser } from "../utils/auth";
+
+
 const router = useRouter();
-const user = JSON.parse(localStorage.getItem("user"));
+
+// 点击时再读取
+// const goProfile = () => {
+//   const user = JSON.parse(localStorage.getItem("user") || "{}"); 
+//   if (user.role === "admin") {
+//     router.push("/admin");
+//   } else {
+//     router.push("/orders");
+//   }
+// };
+
+// 响应式获取 user
+// const user = computed(() => {
+//   return JSON.parse(localStorage.getItem("user") || "{}");
+// });
+    const user = computed(() => getUser());
 
 const goProfile = () => {
-  if (user.role === "admin") {
+  const u = user.value; // 注意要用 .value
+  if (u.role === "admin") {
     router.push("/admin");
   } else {
     router.push("/orders");
   }
 };
+
 </script>
 
 <style scoped>

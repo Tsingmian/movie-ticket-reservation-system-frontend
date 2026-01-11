@@ -88,6 +88,7 @@ body {
   overflow-y: hidden;
 }
 
+/* 会有8px的白边，浏览器加载的，可以改动，比较麻烦，弃之     why:   body样式没有真正覆盖（为什么没覆盖暂时还不知道） */
 
 .login-container {
   display: flex;
@@ -100,7 +101,7 @@ body {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  background-attachment: fixed; /* 滚动不动 */
+  background-attachment: fixed; /* 滚动不动  没起作用，不知道为什么*/
 }
 
 .login-card {

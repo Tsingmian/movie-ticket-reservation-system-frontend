@@ -7,12 +7,13 @@ import MovieDetail from "../views/MovieDetail.vue";
 import SeatSelection from "../views/SeatSelection.vue";
 import OrderList from "../views/OrderList.vue";
 import OrderDetail from "../views/OrderDetail.vue";
+import Admin from "../views/Admin.vue";
 
 import { isLogin } from "../utils/auth";
+import { getUser } from "../utils/auth";
 
-// 占位组件
 // const Empty = { template: "<div>Loading...</div>" };
-const Empty = { template: "<div>Loading...</div>" };
+// const Empty = { template: "<div>Loading...</div>" };
 
 // const routes = [
 //   { path: "/", redirect: "/login" },
@@ -25,6 +26,20 @@ const Empty = { template: "<div>Loading...</div>" };
 
 const routes = [
   {
+    path: "/",
+    redirect: () => {
+      // const user = JSON.parse(localStorage.getItem("user") || "{}");
+      const user = getUser();
+      if (user && user.role) {
+        // return "/movies"; // 已登录
+        return user.role === "admin" ? "/admin" : "/movies";
+      } else {
+        return "/login"; // 未登录
+      }
+    },
+  },
+
+  {
     path: "/login",
     component: Login,
   },
@@ -32,7 +47,7 @@ const routes = [
   {
     path: "/",
     component: MainLayout,
-    redirect: "/movies",
+    // redirect: "/movies",
     children: [
       { path: "movies", component: MovieList },
       { path: "movies/:id", component: MovieDetail },
@@ -40,8 +55,8 @@ const routes = [
       { path: "select/:screeningId", component: SeatSelection },
       { path: "orders", component: OrderList },
       { path: "orders/:orderId", component: OrderDetail },
-      { path: "reviews", component: Empty },
-      { path: "admin", component: Empty }, // 先占位
+      // { path: "reviews", component: Empty },
+      { path: "admin", component: Admin },
     ],
   },
 ];
@@ -59,17 +74,37 @@ const router = createRouter({
 //   }
 // });
 
+// router.beforeEach((to, from, next) => {
+//   const loggedIn = isLogin();
+//   // // 已登录用户，禁止再访问登录页
+//   // if (to.path === "/login" && isLogin()) {
+//   //   next("/movies");
+//   //   return;
+//   // }
+//   不需要，不好测试
+
+//   // 未登录禁止访问
+//   if (to.path !== "/login" && !isLogin()) {
+//     next("/login");
+//     return;
+//   }
+
+//   next();
+// });
+
 router.beforeEach((to, from, next) => {
   const loggedIn = isLogin();
-  // // 已登录用户，禁止再访问登录页
-  // if (to.path === "/login" && isLogin()) {
-  //   next("/movies");
-  //   return;
-  // }
+  // const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const user = getUser();
 
-  // 未登录用户，禁止访问其他页面
-  if (to.path !== "/login" && !isLogin()) {
+  if (!loggedIn && to.path !== "/login") {
     next("/login");
+    return;
+  }
+
+  // 禁止用户
+  if (to.path.startsWith("/admin") && user.role !== "admin") {
+    next("/movies");
     return;
   }
 
@@ -77,3 +112,11 @@ router.beforeEach((to, from, next) => {
 });
 
 export default router;
+
+// !
+// !   !
+// !   !    !
+// 临时清空缓存，防止之前的数据残留，不进入登录页面
+
+// localStorage.removeItem('user');
+// location.reload();

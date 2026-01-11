@@ -153,7 +153,7 @@ async function fetchSeats() {
   selectedSeats.value = []
   try {
     const res = await axios.get(`http://localhost:8080/screenings/${screeningId}/seats`)
-    // 默认票价50，可根据实际修改
+    // 默认票价50(默认出错)
     seatList.value = res.data.map(s => ({ ...s, price: 50 }))
   } catch (err) {
     console.error(err)

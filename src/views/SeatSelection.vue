@@ -7,7 +7,7 @@
       <el-table-column
         v-for="col in cols"
         :key="col"
-        :label="'Col ' + col"
+        :label="'列 ' + col"
       >
         <template #default="{ row }">
           <el-button
@@ -23,9 +23,13 @@
     </el-table>
 
     <div class="actions" style="margin-top: 20px;">
-      <p>已选座位: {{ selectedSeatsText }}</p>
-      <p>总价: ￥{{ totalPrice }}</p>
-      <el-button type="primary" @click="placeOrder" :disabled="selectedSeats.length === 0">
+      <p>已选座位：{{ selectedSeatsText }}</p>
+      <p>总价：￥{{ totalPrice }}</p>
+      <el-button
+        type="primary"
+        @click="placeOrder"
+        :disabled="selectedSeats.length === 0"
+      >
         下单支付
       </el-button>
     </div>
@@ -33,21 +37,36 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+import { useRouter } from 'vue-router'
+const router = useRouter()
+
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
 
-// 模拟登录用户
-const userId = 1
-const screeningId = 1
-const screeningName = ref('测试电影 18:00')
+// 路由参数
+const route = useRoute()
+const screeningId = Number(route.params.screeningId)
+if (!screeningId) {
+  ElMessage.error('非法场次')
+}
 
-const seatList = ref([]) // 后端返回的座位列表
-const selectedSeats = ref([]) // 已选座位数组
+// 当前登录用户
+const user = JSON.parse(localStorage.getItem('user') || '{}')
+const userId = user.id
 
-// 表格布局计算
+// 场次信息
+const screeningName = ref('')
+
+// 座位数据
+const seatList = ref([])
+const selectedSeats = ref([])
+
+// 表格布局
 const rows = 5
-const cols = [1,2,3,4,5]
+const cols = [1, 2, 3, 4, 5]
+
 const seatGrid = computed(() => {
   const grid = []
   for (let r = 1; r <= rows; r++) {
@@ -60,59 +79,102 @@ const seatGrid = computed(() => {
   return grid
 })
 
-// 总价
-const totalPrice = computed(() => selectedSeats.value.reduce((sum, s) => sum + s.price, 0))
+// 计算属性
+const totalPrice = computed(() =>
+  selectedSeats.value.reduce((sum, s) => sum + s.price, 0)
+)
 
-// 已选座位文字
-const selectedSeatsText = computed(() => selectedSeats.value.map(s => `${s.rowNum}-${s.colNum}`).join(', '))
+const selectedSeatsText = computed(() =>
+  selectedSeats.value.map(s => `${s.rowNum}-${s.colNum}`).join(', ')
+)
 
-// 获取座位状态类型
+// 座位状态
 function getSeatType(seat) {
-  if (!seat) return 'default'
+  if (!seat) return 'info'
   if (seat.status === 0) return 'success'
   if (seat.status === 1) return 'warning'
-  if (seat.status === 2) return 'danger'
+  return 'danger'
 }
 
-// 点击切换座位
+// 点击座位
 function toggleSeat(seat) {
   if (!seat || seat.status === 2) return
-
   const index = selectedSeats.value.findIndex(s => s.id === seat.id)
-  if (index >= 0) {
-    selectedSeats.value.splice(index, 1)
-  } else {
-    selectedSeats.value.push(seat)
-  }
+  index >= 0
+    ? selectedSeats.value.splice(index, 1)
+    : selectedSeats.value.push(seat)
 }
 
 // 下单
 async function placeOrder() {
   try {
+    if (selectedSeats.value.length === 0) return
+
+    // 收集所有选中座位的 id
     const seatIds = selectedSeats.value.map(s => s.id)
-    await axios.post('http://localhost:8080/orders/place', {
-       userId, screeningId, seatIds : selectedSeats.value.map(s => s.id)
-    })
-    ElMessage.success('下单成功！')
-    fetchSeats() // 刷新座位状态
+
+    // 一次性发送 JSON 请求，并保存返回值
+    const res = await axios.post(
+      'http://localhost:8080/orders/place',
+      {
+        userId,
+        screeningId,
+        seatIds
+      },
+      {
+        headers: { 'Content-Type': 'application/json' }
+      }
+    )
+
+    ElMessage.success('下单成功')
+
+    // 假设后端返回订单ID
+    const orderId = res.data.order.id
+
+    // 清空已选座
     selectedSeats.value = []
+
+    // 跳转到订单详情页
+    router.push(`/orders/${orderId}`)
+
+    // 刷新座位
+    fetchSeats()  
+
   } catch (err) {
-    ElMessage.error(err.response?.data?.message || err.message)
+    console.error(err)
+    ElMessage.error(err.response?.data?.message || '下单失败')
     fetchSeats()
   }
 }
 
+
 // 获取座位
 async function fetchSeats() {
+  selectedSeats.value = []
   try {
     const res = await axios.get(`http://localhost:8080/screenings/${screeningId}/seats`)
-    seatList.value = res.data.map(s => ({ ...s, price: 50 })) // 假设票价 50 元
+    // 默认票价50，可根据实际修改
+    seatList.value = res.data.map(s => ({ ...s, price: 50 }))
   } catch (err) {
+    console.error(err)
     ElMessage.error('获取座位失败')
   }
 }
 
+// 获取场次信息
+async function fetchScreening() {
+  try {
+    const res = await axios.get(`http://localhost:8080/screenings/${screeningId}`)
+    const s = res.data
+    screeningName.value = `影厅：${s.hallName} ｜ ${s.startTime}`
+  } catch (err) {
+    console.error(err)
+    ElMessage.error('获取场次信息失败')
+  }
+}
+
 onMounted(() => {
+  fetchScreening()
   fetchSeats()
 })
 </script>

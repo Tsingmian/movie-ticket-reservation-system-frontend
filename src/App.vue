@@ -12,9 +12,8 @@
   </script>
   
   <style>
-  /* 可以加一些全局样式 */
   #app {
-    font-family: Avenir, Helvetica, Arial, sans-serif;
+    /* font-family: Avenir, Helvetica, Arial, sans-serif; */
     text-align: center;
   }
   </style>

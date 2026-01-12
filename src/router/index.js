@@ -8,6 +8,7 @@ import SeatSelection from "../views/SeatSelection.vue";
 import OrderList from "../views/OrderList.vue";
 import OrderDetail from "../views/OrderDetail.vue";
 import Admin from "../views/Admin.vue";
+import ReviewList from "../views/ReviewList.vue";
 
 import { isLogin } from "../utils/auth";
 import { getUser } from "../utils/auth";
@@ -55,7 +56,7 @@ const routes = [
       { path: "select/:screeningId", component: SeatSelection },
       { path: "orders", component: OrderList },
       { path: "orders/:orderId", component: OrderDetail },
-      // { path: "reviews", component: Empty },
+      { path: "reviews", component: ReviewList },
       { path: "admin", component: Admin },
     ],
   },
@@ -109,7 +110,7 @@ router.beforeEach((to, from, next) => {
   }
 
   next();
-});
+});``
 
 export default router;
 

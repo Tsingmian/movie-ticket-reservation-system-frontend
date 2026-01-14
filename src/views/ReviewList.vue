@@ -7,18 +7,8 @@
     <el-card class="movie-selector">
       <el-form :model="form" label-width="80px">
         <el-form-item label="选择电影">
-          <el-select
-            v-model="form.movieId"
-            placeholder="请选择电影"
-            @change="handleMovieChange"
-            style="width: 100%"
-          >
-            <el-option
-              v-for="movie in movies"
-              :key="movie.id"
-              :label="movie.title"
-              :value="movie.id"
-            />
+          <el-select v-model="form.movieId" placeholder="请选择电影" @change="handleMovieChange" style="width: 100%">
+            <el-option v-for="movie in movies" :key="movie.id" :label="movie.title" :value="movie.id" />
           </el-select>
         </el-form-item>
       </el-form>
@@ -27,35 +17,16 @@
     <!-- 添加新评论 -->
     <el-card class="add-comment" v-if="form.movieId">
       <h3>发表你的评价</h3>
-      <el-form
-        :model="newComment"
-        :rules="commentRules"
-        ref="commentFormRef"
-        label-width="80px"
-      >
+      <el-form :model="newComment" :rules="commentRules" ref="commentFormRef" label-width="80px">
         <el-form-item label="用户名" prop="userName">
-          <el-input
-            v-model="newComment.userName"
-            maxlength="30"
-            show-word-limit
-          />
+          <el-input v-model="newComment.userName" maxlength="30" show-word-limit />
         </el-form-item>
         <el-form-item label="评论内容" prop="content">
-          <el-input
-            v-model="newComment.content"
-            type="textarea"
-            :rows="4"
-            maxlength="500"
-            show-word-limit
-            placeholder="说说你的观影感受吧..."
-          />
+          <el-input v-model="newComment.content" type="textarea" :rows="4" maxlength="500" show-word-limit
+            placeholder="说说你的观影感受吧..." />
         </el-form-item>
         <el-form-item>
-          <el-button
-            type="primary"
-            @click="submitComment"
-            :loading="submitting"
-          >
+          <el-button type="primary" @click="submitComment" :loading="submitting">
             提交评论
           </el-button>
         </el-form-item>
@@ -66,17 +37,13 @@
     <div v-if="comments.length > 0" class="comment-list">
       <h3>已有 {{ comments.length }} 条评价</h3>
       <el-timeline>
-        <el-timeline-item
-          v-for="comment in comments"
-          :key="comment.comment_id"
-          :timestamp="formatTime(comment.comment_time)"
-          placement="top"
-        >
+        <el-timeline-item v-for="comment in comments" :key="comment.commentId"
+          :timestamp="formatTime(comment.commentTime)" placement="top">
           <el-card>
             <div class="comment-header">
-              <span class="user-name">{{ comment.user_name }}</span>
+              <span class="user-name">{{ comment.userName }}</span>
             </div>
-            <p class="comment-content">{{ comment.comment_content }}</p>
+            <p class="comment-content">{{ comment.content }}</p>
           </el-card>
         </el-timeline-item>
       </el-timeline>
@@ -138,6 +105,8 @@ const loadComments = async (movieId) => {
     // 如果后端直接返回 [...] → 用 res.data
     comments.value = res.data.data || res.data || [];
     console.log('Loaded comments:', comments.value);
+    console.log("第一条评论对象 =", comments.value[0]);
+
   } catch (err) {
     ElMessage.error('加载评论失败');
     console.error('loadComments error:', err);
@@ -165,7 +134,7 @@ const loadComments = async (movieId) => {
 //   try {
 //     const res = await axios.get('/movies');
 //     const rawData = res.data.data || res.data || [];
-    
+
 //     // 过滤：必须有 id 且 id 不为 null/undefined，且有 title
 //     movies.value = rawData.filter(m => 
 //       m && 
@@ -196,7 +165,7 @@ const loadComments = async (movieId) => {
 const fetchMovies = async () => {
   try {
     const res = await axios.get('/movies');
-    
+
     // 🔥 关键：打印原始响应
     console.log('Full response from /movies:', res);
     console.log('res.data =', res.data);
@@ -217,7 +186,7 @@ const fetchMovies = async () => {
       return;
     }
 
-    movies.value = movieList.filter(m => 
+    movies.value = movieList.filter(m =>
       m && m.id != null && m.title
     );
 

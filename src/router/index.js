@@ -110,7 +110,8 @@ router.beforeEach((to, from, next) => {
   }
 
   next();
-});``
+});
+``;
 
 export default router;
 
@@ -121,3 +122,5 @@ export default router;
 
 // localStorage.removeItem('user');
 // location.reload();
+
+//登录过一次后。如若下次点开为非登录界面，使用上面的代码清空浏览器缓存

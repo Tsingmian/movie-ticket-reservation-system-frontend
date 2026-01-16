@@ -1,4 +1,3 @@
-<!-- frontend/src/views/ReviewList.vue -->
 <template>
   <div class="review-page">
     <h2 class="page-title">观影评价</h2>
@@ -100,9 +99,9 @@ const loadComments = async (movieId) => {
     const res = await axios.get('/api/comments/list', {
       params: { movieId }
     });
-    // 🔥 关键：根据后端实际返回结构调整！
+    // 关键：根据后端实际返回结构调整！
     // 如果后端返回 { status:1, data: [...] } → 用 res.data.data
-    // 如果后端直接返回 [...] → 用 res.data
+    // 如果后端直接返回 [...] → 用 res.data 
     comments.value = res.data.data || res.data || [];
     console.log('Loaded comments:', comments.value);
     console.log("第一条评论对象 =", comments.value[0]);
@@ -117,7 +116,7 @@ const loadComments = async (movieId) => {
 // const fetchMovies = async () => {
 //   try {
 //     const res = await axios.get('/movies');
-//     // 🔥 同样：根据后端返回结构决定是否取 .data
+//     // 同样：根据后端返回结构决定是否取 .data
 //     movies.value = res.data.data || res.data || [];
 //     console.log('Fetched movies:', movies.value);
 //     if (movies.value.length > 0) {
@@ -166,7 +165,7 @@ const fetchMovies = async () => {
   try {
     const res = await axios.get('/movies');
 
-    // 🔥 关键：打印原始响应
+    // 打印原始响应
     console.log('Full response from /movies:', res);
     console.log('res.data =', res.data);
     console.log('typeof res.data =', typeof res.data);

@@ -1,4 +1,3 @@
-<!-- frontend/src/layout/MainLayout.vue -->
 <template>
   <div class="layout">
     <!-- 顶部栏 -->

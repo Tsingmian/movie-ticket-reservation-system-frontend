@@ -1,4 +1,3 @@
-<!-- frontend/src/views/MovieList.vue -->
 <template>
   <div class="movie-list-container">
     <h2 class="page-title">电影榜单</h2>
